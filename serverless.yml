@@ -5,7 +5,10 @@ frameworkVersion: "3"
 
 custom:
   tableName: "users-table-${sls:stage}"
-
+  serverless-offline:
+    httpPort: 9000
+    allowCache: true 
+    corsAllowOrigin: '*'
   dynamodb:
     start:
       port: 6000
