@@ -1,14 +1,25 @@
 org: siddhantprateek
 app: serverless-nest
 service: serverless-nest
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 custom:
-  tableName: 'users-table-${sls:stage}'
+  tableName: "users-table-${sls:stage}"
+
+  dynamodb:
+    start:
+      port: 6000
+      inMemory: true
+      migrate: true
+    stages: dev
+  endpoints:
+    dynamodbURL: "http://localhost:6000"
 
 provider:
   name: aws
   runtime: nodejs18.x
+  apiGateway:
+    shouldStartNameWithService: true
   iam:
     role:
       statements:
@@ -21,15 +32,23 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource:
-            - Fn::GetAtt: [ UsersTable, Arn ]
+            - Fn::GetAtt: [UsersTable, Arn]
   environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    NODE_OPTIONS: --enable-source-maps --stack-trace-limit=1000
+    DYNAMODB_ENDPOINT: ${self:custom.endpoints.dynamodbURL}
     USERS_TABLE: ${self:custom.tableName}
 
 functions:
   api:
-    handler: index.handler
+    handler: dist/serverless.handler
     events:
-      - httpApi: '*'
+      - http:
+          method: ANY
+          path: /
+      - http:
+          method: ANY
+          path: "{proxy+}"
 
 resources:
   Resources:
