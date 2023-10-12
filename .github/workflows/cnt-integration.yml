@@ -1,0 +1,6 @@
+name: Continous Integration - Application Build and Test
+on: [push, pull_request]
+
+jobs:
+  app_test:
+    runs-on: ubuntu-latest
